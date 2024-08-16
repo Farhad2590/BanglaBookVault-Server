@@ -35,6 +35,16 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
+    const booksCollection = client.db("banglaBookVault").collection("books");
+
+
+    app.get('/book', async (req, res) => {
+        const result = await booksCollection.find().toArray();
+        res.send(result);
+      })
+  
+
+
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
     // Ensures that the client will close when you finish/error
