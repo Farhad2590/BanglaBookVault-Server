@@ -44,12 +44,19 @@ async function run() {
       const page = parseInt(req.query.page)-1
       console.log(size,page);
       const filter = req.query.filter
+      const publishers = req.query.publiser
+
       const sort = req.query.sort
       // const search = req.query.search
-         
+    console.log(publishers);
+    
 
       let query = {}
       if (filter) query = {categoryName : filter}
+
+      // let queryPublisher= {}
+      if (publishers) query = {publisher : publishers}
+
       let options = {}
       if (sort) options = { sort: { priceRange: sort === 'asc' ? 1 : -1 } };
       // console.log(sort);
@@ -62,9 +69,13 @@ async function run() {
     // Get all books data count from db
     app.get('/books-count', async (req, res) => {
       const filter = req.query.filter
+      const publishers = req.query.publiser
+
       // const search = req.query.search
       let query = {}
       if (filter) query = {categoryName : filter}
+      if (publishers) query = {publisher : publishers}
+
       // if (filter) query.category = filter
       const count = await booksCollection.countDocuments(query)
 
