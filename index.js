@@ -37,36 +37,36 @@ async function run() {
     await client.db("admin").command({ ping: 1 });
     const booksCollection = client.db("banglaBookVault").collection("books");
 
-
+  
+    
     app.get('/book', async (req, res) => {
       const size = parseInt(req.query.size)
       const page = parseInt(req.query.page)-1
       console.log(size,page);
       const filter = req.query.filter
-      // const sort = req.query.sort
+      const sort = req.query.sort
       // const search = req.query.search
-      // console.log(size, page)
+         
 
       let query = {}
       if (filter) query = {categoryName : filter}
-      // let options = {}
-      // if (sort) options = { sort: { priceRange: sort === 'asc' ? 1 : -1 } }
-      console.log(filter);
+      let options = {}
+      if (sort) options = { sort: { priceRange: sort === 'asc' ? 1 : -1 } };
+      // console.log(sort);
       
-      const result = await booksCollection.find(query).skip(page * size).limit(size).toArray()
+      const result = await booksCollection.find(query,options).skip(page * size).limit(size).toArray()
 
       res.send(result)
     })
 
     // Get all books data count from db
     app.get('/books-count', async (req, res) => {
-      // const filter = req.query.filter
+      const filter = req.query.filter
       // const search = req.query.search
-      // let query = {
-      //   job_title: { $regex: search, $options: 'i' },
-      // }
+      let query = {}
+      if (filter) query = {categoryName : filter}
       // if (filter) query.category = filter
-      const count = await booksCollection.countDocuments()
+      const count = await booksCollection.countDocuments(query)
 
       res.send({ count })
     })
