@@ -20,7 +20,7 @@ Follow these steps to set up the project locally on your machine.
 
 ### Step 1: Clone the Repository
 
-git clone https://github.com/your-username/banglabookvault.git
+git clone https://github.com/your-username/____
 cd banglabookvault
 
 ### Step 2: Install Dependencies
