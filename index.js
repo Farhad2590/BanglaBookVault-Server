@@ -2,14 +2,14 @@ const express = require('express')
 const app = express()
 require('dotenv').config()
 const cors = require('cors')
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion , ObjectId } = require('mongodb');
 
 const port = process.env.PORT || 8000
 
 const corsOptions = {
-    origin: ['http://localhost:5173', 'http://localhost:5174'],
-    credentials: true,
-    optionSuccessStatus: 200,
+  origin: ['http://localhost:5173', 'http://localhost:5174'],
+  credentials: true,
+  optionSuccessStatus: 200,
 }
 
 app.use(cors(corsOptions))
@@ -39,10 +39,39 @@ async function run() {
 
 
     app.get('/book', async (req, res) => {
-        const result = await booksCollection.find().toArray();
-        res.send(result);
-      })
-  
+      const size = parseInt(req.query.size)
+      const page = parseInt(req.query.page)-1
+      console.log(size,page);
+      const filter = req.query.filter
+      // const sort = req.query.sort
+      // const search = req.query.search
+      // console.log(size, page)
+
+      let query = {}
+      if (filter) query = {categoryName : filter}
+      // let options = {}
+      // if (sort) options = { sort: { priceRange: sort === 'asc' ? 1 : -1 } }
+      console.log(filter);
+      
+      const result = await booksCollection.find(query).skip(page * size).limit(size).toArray()
+
+      res.send(result)
+    })
+
+    // Get all books data count from db
+    app.get('/books-count', async (req, res) => {
+      // const filter = req.query.filter
+      // const search = req.query.search
+      // let query = {
+      //   job_title: { $regex: search, $options: 'i' },
+      // }
+      // if (filter) query.category = filter
+      const count = await booksCollection.countDocuments()
+
+      res.send({ count })
+    })
+
+
 
 
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
@@ -54,9 +83,9 @@ run().catch(console.dir);
 
 
 app.get('/', (req, res) => {
-    res.send('Hello from BanglaBookVault Server..')
+  res.send('Hello from BanglaBookVault Server..')
 })
 
 app.listen(port, () => {
-    console.log(`BanglaBookVault is running on port ${port}`)
+  console.log(`BanglaBookVault is running on port ${port}`)
 })
