@@ -40,19 +40,24 @@ async function run() {
           const size = parseInt(req.query.size);
           const page = parseInt(req.query.page) - 1;
           const filter = req.query.filter;
-          const publishers = req.query.publisher;
+          const filters = req.query.filters;
           const sort = req.query.sort;
+          const sorts = req.query.sorts;
           const search = req.query.search;
-  
+         console.log(sorts);
+         
+          
           let query = {};
           if (search && search.length <= 100) {
               query.title = { $regex: search, $options: 'i' };
           }
           if (filter) query.categoryName = filter;
-          if (publishers) query.publisher = publishers;
+          if (filters) query = {publisher: filters};
   
           let options = {};
           if (sort) options.sort = { priceRange: sort === 'asc' ? 1 : -1 };
+          if (sorts) options.sort = { Published_date: sorts === 'olderList' ? 1 : -1 };
+
   
           const result = await booksCollection.find(query, options).skip(page * size).limit(size).toArray();
           res.send(result);
@@ -65,19 +70,17 @@ async function run() {
     // Get all books data count from db
     app.get('/books-count', async (req, res) => {
       const filter = req.query.filter
-      const publishers = req.query.publiser
+      const filters = req.query.filters;
+
 
       // const search = req.query.search
       let query = {}
       if (filter) query = {categoryName : filter}
-      if (publishers) query = {publisher : publishers}
+      if (filters) query = {publisher: filters};
 
       const count = await booksCollection.countDocuments(query)
-
       res.send({ count })
     })
-
-
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
     // Ensures that the client will close when you finish/error
