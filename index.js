@@ -33,40 +33,50 @@ async function run() {
     // await client.db("admin").command({ ping: 1 });
     const booksCollection = client.db("banglaBookVault").collection("books");
 
-  
-    
+
+
     app.get('/book', async (req, res) => {
       try {
-          const size = parseInt(req.query.size);
-          const page = parseInt(req.query.page) - 1;
-          const filter = req.query.filter;
-          const filters = req.query.filters;
-          const sort = req.query.sort;
-          const sorts = req.query.sorts;
-          const search = req.query.search;
-         console.log(sorts);
-         
-          
-          let query = {};
-          if (search && search.length <= 100) {
-              query.title = { $regex: search, $options: 'i' };
-          }
-          if (filter) query.categoryName = filter;
-          if (filters) query = {publisher: filters};
-  
-          let options = {};
-          if (sort) options.sort = { priceRange: sort === 'asc' ? 1 : -1 };
-          if (sorts) options.sort = { Published_date: sorts === 'olderList' ? 1 : -1 };
+        const size = parseInt(req.query.size);
+        const page = parseInt(req.query.page) - 1;
+        const filter = req.query.filter;
+        const filters = req.query.filters;
+        const sort = req.query.sort;
+        const sorts = req.query.sorts;
+        const search = req.query.search;
+        // const maxPrice = req.query.maxPrice;
+        // const minPrice = req.query.minPrice;
+        // console.log(maxPrice, minPrice);
+        const minPrice = parseFloat(req.query.minPrice) || 0;
+        const maxPrice = parseFloat(req.query.maxPrice) || 1000;
+        console.log(maxPrice,minPrice);
+        
 
-  
-          const result = await booksCollection.find(query, options).skip(page * size).limit(size).toArray();
-          res.send(result);
+
+        let query = {};
+        if (search && search.length <= 100) {
+          query.title = { $regex: search, $options: 'i' };
+        }
+       
+
+        if (filter) query.categoryName = filter;
+        if (filters) query = { publisher: filters };
+
+        // query.priceRange = { $gte: minPrice, $lte: maxPrice }
+      
+
+        let options = {};
+        if (sort) options.sort = { priceRange: sort === 'asc' ? 1 : -1 };
+        if (sorts) options.sort = { Published_date: sorts === 'olderList' ? 1 : -1 };
+
+        const result = await booksCollection.find(query).sort(options.sort).skip(page * size).limit(size).toArray();
+        res.send(result);
       } catch (error) {
-          console.error('Error fetching books:', error);
-          res.status(500).send({ error: 'An error occurred while fetching the books.' });
+        console.error('Error fetching books:', error);
+        res.status(500).send({ error: 'An error occurred while fetching the books.' });
       }
-  });
-  
+    });
+
     // Get all books data count from db
     app.get('/books-count', async (req, res) => {
       const filter = req.query.filter
@@ -75,8 +85,8 @@ async function run() {
 
       // const search = req.query.search
       let query = {}
-      if (filter) query = {categoryName : filter}
-      if (filters) query = {publisher: filters};
+      if (filter) query = { categoryName: filter }
+      if (filters) query = { publisher: filters };
 
       const count = await booksCollection.countDocuments(query)
       res.send({ count })
